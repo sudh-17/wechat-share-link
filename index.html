@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>微信分享带封面 Demo</title>
+
+  <!-- 微信分享的关键：OG 标签 -->
+  <meta property="og:title" content="微信分享封面 Demo">
+  <meta property="og:description" content="H5 页面在微信分享时带上封面图的方法">
+  <meta property="og:image" content="https://picsum.photos/300/300?random=1">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://your-domain.com/share-demo">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 0 0 40px;
+    }
+
+    .header {
+      background: #07C160;
+      color: #fff;
+      padding: 36px 20px 28px;
+      text-align: center;
+    }
+    .header h1 { font-size: 20px; margin-bottom: 6px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+
+    .section {
+      background: #fff;
+      margin: 12px;
+      border-radius: 10px;
+      padding: 16px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #07C160;
+    }
+
+    /* 分享卡片预览 */
+    .card-mock {
+      max-width: 280px;
+      margin: 6px auto 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e8e8e8;
+    }
+    .card-mock .cover {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card-mock .cover img { width: 100%; height: 100%; object-fit: cover; }
+    .card-mock .info { padding: 10px 12px; background: #fff; }
+    .card-mock .title { font-size: 14px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-mock .desc { font-size: 12px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    code {
+      background: #f0f0f0;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 13px;
+      color: #c62828;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-family: "Consolas", monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 8px 0;
+      line-height: 1.8;
+    }
+    .code-block .comment { color: #6A9955; }
+    .code-block .tag { color: #569CD6; }
+    .code-block .attr { color: #9CDCFE; }
+    .code-block .string { color: #CE9178; }
+
+    .note {
+      background: #e8f4fd;
+      border-left: 3px solid #2196F3;
+      padding: 10px 12px;
+      margin: 10px 0;
+      font-size: 13px;
+      border-radius: 0 4px 4px 0;
+    }
+    .note.warn { background: #fff8e1; border-left-color: #FFA000; }
+
+    ul { margin: 6px 0 6px 18px; font-size: 13px; color: #555; }
+    ul li { margin-bottom: 4px; }
+    strong { color: #222; }
+
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #999; }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      margin-top: 4px;
+    }
+    input:focus, textarea:focus { border-color: #07C160; }
+    textarea { resize: vertical; min-height: 50px; }
+    .btn {
+      background: #07C160;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 20px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #555; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>微信分享带封面 Demo</h1>
+  <p>只需加几个 meta 标签，分享链接就能显示标题+描述+封面</p>
+</div>
+
+<!-- 效果预览 -->
+<div class="section">
+  <div class="section-title">分享效果预览</div>
+  <div class="card-mock">
+    <div class="cover" id="previewCover">
+      <img src="https://picsum.photos/300/300?random=1" alt="封面" id="previewImg">
+    </div>
+    <div class="info">
+      <div class="title" id="previewTitle">微信分享封面 Demo</div>
+      <div class="desc" id="previewDesc">H5 页面在微信分享时带上封面图的方法</div>
+    </div>
+  </div>
+</div>
+
+<!-- 怎么做 -->
+<div class="section">
+  <div class="section-title">怎么做</div>
+  <p>在 HTML 的 <code>&lt;head&gt;</code> 中加入以下 4 行 meta 标签即可：</p>
+  <div class="code-block">
+<span class="comment">&lt;!-- 分享标题 --&gt;</span>
+&lt;<span class="tag">meta</span> <span class="attr">property</span>=<span class="string">"og:title"</span> <span class="attr">content</span>=<span class="string">"你的标题"</span> /&gt;
+
+<span class="comment">&lt;!-- 分享描述 --&gt;</span>
+&lt;<span class="tag">meta</span> <span class="attr">property</span>=<span class="string">"og:description"</span> <span class="attr">content</span>=<span class="string">"你的描述"</span> /&gt;
+
+<span class="comment">&lt;!-- 封面图（最重要） --&gt;</span>
+&lt;<span class="tag">meta</span> <span class="attr">property</span>=<span class="string">"og:image"</span> <span class="attr">content</span>=<span class="string">"https://xxx.com/cover.jpg"</span> /&gt;
+
+<span class="comment">&lt;!-- 分享类型 --&gt;</span>
+&lt;<span class="tag">meta</span> <span class="attr">property</span>=<span class="string">"og:type"</span> <span class="attr">content</span>=<span class="string">"website"</span> /&gt;</div>
+  <p>微信会自动抓取这些标签生成分享卡片。不需要写任何 JavaScript。</p>
+</div>
+
+<!-- 操作步骤 -->
+<div class="section">
+  <div class="section-title">操作步骤</div>
+  <ol style="font-size:13px; color:#555; margin-left:18px;">
+    <li>准备一张 <strong>正方形</strong> 封面图（建议 300×300 以上，不超过 5MB）</li>
+    <li>把图片上传到公网服务器，获取 <strong>HTTPS</strong> 链接</li>
+    <li>把上面的 4 行 meta 标签复制到页面 <code>&lt;head&gt;</code> 中，填上对应的内容</li>
+    <li>把页面部署到公网（本地 localhost 微信抓不到）</li>
+    <li>发送链接到微信好友 / 文件传输助手，等 1-2 秒看到卡片效果</li>
+  </ol>
+  <div class="note warn">
+    <strong>不要</strong> 直接复制链接粘贴到聊天框——要点击"发送"让微信去爬取。微信有缓存，改了 OG 后等 10 分钟再试。
+  </div>
+</div>
+
+<!-- 图片要求 -->
+<div class="section">
+  <div class="section-title">封面图要求</div>
+  <ul>
+    <li>格式：JPG / PNG</li>
+    <li>尺寸：300×300 以上（正方形）</li>
+    <li>大小：不超过 5MB</li>
+    <li>链接：必须 <strong>HTTPS</strong>（iOS 不支持 HTTP）</li>
+    <li>必须公网可访问，不能有登录验证</li>
+  </ul>
+</div>
+
+<!-- 调试工具 -->
+<div class="section">
+  <div class="section-title">调试工具</div>
+  <div class="form-group">
+    <label>标题 (og:title)</label>
+    <input type="text" id="inputTitle" value="微信分享封面 Demo">
+  </div>
+  <div class="form-group">
+    <label>描述 (og:description)</label>
+    <textarea id="inputDesc">H5 页面在微信分享时带上封面图的方法</textarea>
+  </div>
+  <div class="form-group">
+    <label>封面图链接 (og:image)</label>
+    <input type="url" id="inputImage" value="https://picsum.photos/300/300?random=1">
+  </div>
+  <button class="btn" id="previewBtn">更新预览</button>
+</div>
+
+<!-- FAQ -->
+<div class="section">
+  <div class="section-title">常见问题</div>
+  <p><strong>加了 OG 标签还是不显示封面？</strong></p>
+  <ul>
+    <li>页面部署到公网了吗？</li>
+    <li><code>og:image</code> 是完整 HTTPS 链接吗？</li>
+    <li>图片超过 5MB 了吗？</li>
+    <li>你是"发送"链接还是"粘贴"链接？（要用发送）</li>
+    <li>微信有缓存，等 10 分钟或在链接后加 <code>?t=时间戳</code></li>
+  </ul>
+  <p style="margin-top:10px;"><strong>一定要 HTTPS 吗？</strong></p>
+  <p style="font-size:13px; color:#555;">是的。iOS 版微信只加载 HTTPS 图片，否则不显示封面。</p>
+</div>
+
+<div class="footer">
+  2026 · 给前端小白的微信分享指南
+</div>
+
+<script>
+  var previewBtn = document.getElementById('previewBtn');
+  var inputTitle = document.getElementById('inputTitle');
+  var inputDesc = document.getElementById('inputDesc');
+  var inputImage = document.getElementById('inputImage');
+  var previewTitle = document.getElementById('previewTitle');
+  var previewDesc = document.getElementById('previewDesc');
+  var previewCover = document.getElementById('previewCover');
+
+  previewBtn.addEventListener('click', function() {
+    previewTitle.textContent = inputTitle.value.trim() || '未设置';
+    previewDesc.textContent = inputDesc.value.trim() || '未设置';
+
+    var img = inputImage.value.trim();
+    if (img) {
+      previewCover.innerHTML = '';
+      var imgEl = document.createElement('img');
+      imgEl.alt = '封面';
+      imgEl.onerror = function() {
+        previewCover.textContent = '图片加载失败';
+        previewCover.style.color = '#c62828';
+      };
+      imgEl.src = img;
+      previewCover.appendChild(imgEl);
+    } else {
+      previewCover.textContent = '';
+    }
+  });
+</script>
+
+</body>
+</html>
